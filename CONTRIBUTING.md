@@ -144,3 +144,17 @@ Readable code is preferred over clever code.
 Correctness is preferred over brevity.
 
 Maintainability is preferred over premature optimization.
+
+# Development Process and Rules
+
+## Before committing
+
+- Review every changed file.
+- Ensure every change is intentional.
+- Remove commented-out code.
+- Remove temporary debugging code.
+- Ensure new public classes and methods have Javadoc.
+- Run:
+
+```bash
+mvn clean verify
