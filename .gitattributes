@@ -1,0 +1,18 @@
+* text=auto eol=lf
+
+*.java      text
+*.xml       text
+*.xhtml     text
+*.html      text
+*.css       text
+*.md        text
+*.properties text
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.epub binary
+*.ttf binary
+*.otf binary

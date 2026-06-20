@@ -297,4 +297,4 @@ Keeping rules isolated makes the project easier to test, review, and maintain.
 
 # License
 
-License to be determined.
+Apache-2.0 license.
