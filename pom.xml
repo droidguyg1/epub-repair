@@ -9,7 +9,7 @@
 
   <groupId>org.stanb</groupId>
   <artifactId>epub-repair</artifactId>
-  <version>0.2.0-SNAPSHOT</version>
+  <version>0.3.0-SNAPSHOT</version>
 
   <name>EPUB Repair</name>
   <description>Rule-based EPUB 2 XHTML repair utility.</description>

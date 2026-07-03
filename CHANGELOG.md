@@ -15,3 +15,8 @@
 ### Added
 - Repair framework
 - WrapOrphanTextRule
+
+## [0.3.0] - Milestone 1C - Completed
+
+### Added
+- Remove Empty Paragraphs rule
