@@ -154,7 +154,8 @@ Maintainability is preferred over premature optimization.
 - Remove commented-out code.
 - Remove temporary debugging code.
 - Ensure new public classes and methods have Javadoc.
-- Run:
+- Run: `mvn clean verify`
 
-```bash
-mvn clean verify
+## Milestone
+
+- A milestone is not complete until mvn clean verify passes and the packaged JAR passes an end-to-end test against representative real input.
