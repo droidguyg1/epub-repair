@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import org.stanb.epubrepair.rules.RemoveEmptyParagraphRule;
 import org.stanb.epubrepair.rules.WrapOrphanTextRule;
 import org.stanb.epubrepair.xml.XmlReader;
 import org.stanb.epubrepair.xml.XmlWriter;
@@ -15,7 +16,9 @@ public final class XhtmlRepair {
 
   private final XmlReader xmlReader = new XmlReader();
   private final XmlWriter xmlWriter = new XmlWriter();
-  private final List<RepairRule> rules = List.of(new WrapOrphanTextRule());
+  private final List<RepairRule> rules = List.of(
+      new WrapOrphanTextRule(),
+      new RemoveEmptyParagraphRule());
   private final RepairEngine repairEngine = new RepairEngine(rules);
 
   public List<RepairRule> rules() {

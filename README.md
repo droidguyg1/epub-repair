@@ -4,7 +4,7 @@
 
 The project originated from editing EPUB books with Calibre, where malformed or inconsistent XHTML required repetitive manual repair. Rather than fixing each problem by hand, EPUB Repair provides a rule-based repair engine that applies deterministic, well-defined corrections.
 
-The project targets **EPUB 2** documents, whose content files are XHTML 1.1 XML documents.
+The project targets **EPUB 2** documents, whose content files are XHTML XML documents.
 
 ---
 
@@ -15,8 +15,9 @@ The primary goals of EPUB Repair are:
 * Repair malformed EPUB XHTML without altering unrelated content.
 * Preserve EPUB validity.
 * Preserve XML structure, namespaces, comments, and processing instructions.
-* Apply only explicitly requested repairs.
+* Apply only explicitly defined repairs.
 * Produce deterministic output.
+* Produce readable, consistently formatted XHTML for visual inspection.
 * Provide an extensible architecture for adding new repair rules.
 
 The project emphasizes correctness over aggressive cleanup.
@@ -29,19 +30,19 @@ EPUB Repair follows a conservative editing philosophy.
 
 The XML document belongs to the user.
 
-The application modifies only those parts of the document that are explicitly targeted by enabled repair rules.
+The application modifies only those parts of the document that are explicitly targeted by repair rules.
 
-If a document contains valid XHTML, EPUB Repair should leave it unchanged.
+If a document requires no repair, EPUB Repair does not rewrite it.
 
-Running the program twice on the same document should produce identical output.
+Running the program twice on the same repaired document should produce no additional changes.
 
-The program must never "pretty print" or reformat an entire document simply because it was opened and saved.
+When a document is changed, the XML writer produces consistently formatted, human-readable XHTML so that the result can be visually inspected.
 
 ---
 
 # Why XML Instead of HTML?
 
-Although many EPUB content files use the `.html` extension, EPUB 2 specifies that these files are **XHTML**.
+Although many EPUB content files use the `.html` extension, EPUB 2 content documents are XHTML.
 
 For example:
 
@@ -71,55 +72,63 @@ Future support for EPUB 3 may be added, but EPUB 2 compatibility is the primary 
 
 # Current Repair Rules
 
-Initial repair rules include:
+Current repair rules include:
 
-* Wrap orphan text nodes inside paragraph elements.
-* Remove empty paragraphs.
+* `wrap-orphan-text` — wraps orphan text nodes inside paragraph elements.
+* `remove-empty-paragraph` — removes paragraphs containing no meaningful content.
+
+Planned rules include:
+
 * Remove invalid paragraph height declarations.
-* Additional rules will be added over time.
+* Additional rules discovered through real EPUB repair work.
 
-Each repair is implemented as an independent rule.
+Each repair is implemented as an independent rule and reports its own change count.
 
 ---
 
 # Architecture
 
-```
+```text
 org.stanb.epubrepair
 
     Main
 
-    cli/
+    io/
+        XhtmlFileFinder
 
     repair/
-        XHTMLRepair
         RepairContext
+        RepairEngine
         RepairReport
         RepairRule
+        XhtmlRepair
 
     rules/
+        WrapOrphanTextRule
+        RemoveEmptyParagraphRule
 
     xml/
-
-    io/
-
-    util/
+        XmlReader
+        XmlWriter
 ```
 
 Every repair rule implements the common `RepairRule` interface.
 
-The repair engine loads the enabled rules and applies them sequentially to each XHTML document.
+The repair engine applies an ordered list of rules to each XHTML document.
 
-Rules do not depend on one another.
+Each rule reports its changes through the document's `RepairContext`. The application aggregates those changes into a `RepairReport` for the complete run.
+
+Rules are designed to remain independent and must not rely on execution order except where explicitly documented.
 
 ---
 
 # Repair Rules
 
-Each repair rule must satisfy the following principles.
+Each repair rule must satisfy the following principles:
 
 * Independent.
 * Deterministic.
+* Idempotent.
 * Testable.
 * Report its own statistics.
 * Modify only what the rule is responsible for.
@@ -132,60 +141,102 @@ Rules must never rely on execution order except where explicitly documented.
 
 For every XHTML document:
 
-```
+```text
+Find XHTML file
+
+↓
+
 Read XML
 
 ↓
 
-Validate XML
+Create repair context
 
 ↓
 
-Apply enabled repair rules
+Apply repair rules
 
 ↓
 
-Write XML
+Write XML only if changes were made
+
+↓
+
+Aggregate per-rule statistics
 ```
 
-The XML writer must preserve:
+The XML layer must preserve valid XHTML structure, including:
 
 * XML declaration
 * namespaces
 * comments
 * processing instructions
-* empty XML elements
+* valid XML element syntax
 * EPUB validity
+
+Changed documents are written in a consistent, human-readable format for visual inspection.
 
 ---
 
 # Command Line
 
-The initial interface is expected to be:
+Build and verify the project:
 
-```
-epubrepair <directory>
+```bash
+mvn clean verify
 ```
 
-Future versions will support enabling individual repair rules:
+The Maven build produces a self-contained executable JAR containing EPUB Repair and its runtime dependencies.
 
-```
-epubrepair book --rule wrap-orphan-text
+Run EPUB Repair against a single XHTML file or a directory:
 
-epubrepair book \
-    --rule wrap-orphan-text \
-    --rule remove-empty-paragraphs
+```bash
+java -jar target/epub-repair-0.3.0-SNAPSHOT.jar <file-or-directory>
 ```
+
+Directories are searched recursively for `.html` and `.xhtml` files.
+
+The application reports the number of changes made to each file and prints an aggregate summary:
+
+```text
+Files processed: 12
+Files failed:     0
+Changes made:     37
+
+Changes by rule:
+  wrap-orphan-text: 30
+  remove-empty-paragraph: 7
+```
+
+Rules that execute but make no changes are still included with a count of zero.
+
+Future versions may support enabling individual repair rules from the command line.
 
 ---
 
 # Testing
 
-Every bug fixed becomes a permanent regression test.
+Every bug fixed should become a permanent regression test.
 
-The project maintains a corpus of XHTML documents representing real EPUB problems.
+Repair rules are tested independently and through integration tests.
 
-Whenever a repair rule is modified, these documents verify that previous repairs continue to work correctly.
+Tests verify:
+
+* The intended repair is performed.
+* Unrelated content is preserved.
+* Rule-specific change counts are correct.
+* Multiple rules work together correctly.
+* A second run makes no additional changes.
+
+Real XHTML files are also used for end-to-end testing.
+
+A milestone is not complete until:
+
+```bash
+mvn clean verify
+```
+
+passes and the packaged executable JAR passes an end-to-end test against representative real input.
 
 ---
 
@@ -201,15 +252,21 @@ The project follows these engineering principles.
 * One public class per file
 * Javadoc for public classes and methods
 * Descriptive naming
+* Acronyms treated as words in identifiers, such as `XmlReader` and `XhtmlRepair`
+* Two-space indentation
 * Clean package organization
-* Logging instead of scattered console output
+* Modern Java APIs at project boundaries
+* Implementation-specific adaptation kept inside implementation classes
 
 ## Project Quality
 
-* No technical debt by design.
+* Avoid technical debt by design.
 * Refactor before adding new features when necessary.
+* Prefer simple solutions over premature abstractions.
 * Every milestone produces a working application.
 * Every milestone builds successfully.
+* Every milestone produces a runnable self-contained JAR.
+* Every milestone passes automated tests and a manual end-to-end test.
 
 ---
 
@@ -223,8 +280,8 @@ Each milestone is developed on its own feature branch.
 
 Typical workflow:
 
-```
-feature/milestone-1a
+```text
+feature/milestone-1c
 
 ↓
 
@@ -232,11 +289,23 @@ Development
 
 ↓
 
-Testing
+Review
+
+↓
+
+mvn clean verify
+
+↓
+
+JAR end-to-end test
 
 ↓
 
 Pull Request
+
+↓
+
+GitHub Actions
 
 ↓
 
@@ -247,33 +316,31 @@ Direct commits to `main` are avoided.
 
 Each commit should represent a single logical change.
 
-Examples:
-
-* Initial Maven project
-* XML reader
-* XML writer
-* Repair framework
-* Wrap orphan text rule
+GitHub Actions runs the Maven verification build for pushes and pull requests according to the repository workflow configuration.
 
 ---
 
 # Roadmap
 
-## Milestone 1A
+## Milestone 1A — Complete
 
 * Maven project
 * XML reader
 * XML writer
 * XHTML round-trip
-* Directory traversal
+* Recursive directory traversal
 * Reporting
+* Self-contained executable JAR
 
-## Milestone 1B
+## Milestone 1B — Complete
 
 * Repair framework
+* Repair context
+* Repair engine
+* Per-rule reporting
 * Wrap orphan text rule
 
-## Milestone 1C
+## Milestone 1C — In Progress
 
 * Remove empty paragraph rule
 
@@ -289,12 +356,14 @@ Future milestones will add additional repair rules as new EPUB issues are discov
 
 The project is intentionally designed around small, independent repair rules.
 
-New functionality should normally be implemented as a new rule rather than by modifying existing rules.
+New repair functionality should normally be implemented as a new rule rather than by expanding the responsibility of an existing rule.
 
-Keeping rules isolated makes the project easier to test, review, and maintain.
+Keeping rules isolated makes the project easier to test, review, maintain, and extend.
+
+See `docs/CONTRIBUTING.md` and `docs/CODING_STANDARDS.md` for the project's development process and coding conventions.
 
 ---
 
 # License
 
-Apache-2.0 license.
+Licensed under the Apache License 2.0.
