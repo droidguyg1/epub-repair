@@ -95,6 +95,26 @@ Element e;
 
 Names should explain purpose rather than type.
 
+## Treat acronyms as words.
+
+Prefer:
+
+XmlReader
+HtmlDocument
+CssParser
+HttpClient
+UriBuilder
+EpubRepair
+
+Avoid:
+
+XMLReader
+HTMLDocument
+CSSParser
+HTTPClient
+URIBuilder
+EPUBRepair
+
 ---
 
 # Javadoc
