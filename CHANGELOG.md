@@ -1,6 +1,6 @@
 # Changelog
 
-## [0.1.0] - Milestone 1A - Planned
+## [0.1.0] - Milestone 1A - Completed
 
 ### Added
 - Maven project structure
@@ -10,7 +10,7 @@
 - Directory traversal
 - Reporting framework
 
-## [0.2.0] - Milestone 1B - Planned
+## [0.2.0] - Milestone 1B - Completed
 
 ### Added
 - Repair framework

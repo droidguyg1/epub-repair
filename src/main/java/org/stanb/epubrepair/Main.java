@@ -3,9 +3,11 @@ package org.stanb.epubrepair;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 import org.jdom2.JDOMException;
 import org.stanb.epubrepair.io.XhtmlFileFinder;
+import org.stanb.epubrepair.repair.RepairContext;
 import org.stanb.epubrepair.repair.RepairReport;
 import org.stanb.epubrepair.repair.XhtmlRepair;
 
@@ -21,14 +23,13 @@ public final class Main {
       System.exit(2);
     }
 
-    int exitCode = run(Path.of(args[0]));
-    System.exit(exitCode);
+    System.exit(run(Path.of(args[0])));
   }
 
   private static int run(Path inputPath) {
     XhtmlFileFinder finder = new XhtmlFileFinder();
     XhtmlRepair repair = new XhtmlRepair();
-    RepairReport report = new RepairReport();
+    RepairReport report = new RepairReport(repair.rules());
 
     final List<Path> files;
     try {
@@ -40,16 +41,28 @@ public final class Main {
 
     for (Path file : files) {
       try {
-        repair.process(file);
-        report.recordProcessedFile();
+        RepairContext context = repair.process(file);
+        report.recordProcessedFile(context);
+        System.out.printf("%s: %d change(s)%n", file, context.totalChanges());
       } catch (IOException | JDOMException exception) {
         report.recordFailedFile();
         System.err.println("Failed to process " + file + ": " + exception.getMessage());
       }
     }
 
+    printReport(report);
+    return report.hasFailures() ? 1 : 0;
+  }
+
+  private static void printReport(RepairReport report) {
     System.out.printf("Files processed: %d%n", report.filesProcessed());
     System.out.printf("Files failed:    %d%n", report.filesFailed());
-    return report.hasFailures() ? 1 : 0;
+    System.out.printf("Changes made:    %d%n", report.changesMade());
+    System.out.println();
+    System.out.println("Changes by rule:");
+
+    for (Map.Entry<String, Integer> entry : report.changesByRule().entrySet()) {
+      System.out.printf("  %s: %d%n", entry.getKey(), entry.getValue());
+    }
   }
 }

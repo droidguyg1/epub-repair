@@ -1,13 +1,24 @@
 package org.stanb.epubrepair.repair;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 /** Records processing results for one application run. */
 public final class RepairReport {
 
   private int filesProcessed;
   private int filesFailed;
+  private final Map<String, Integer> changesByRule = new LinkedHashMap<>();
 
-  public void recordProcessedFile() {
+  public RepairReport(Iterable<? extends RepairRule> rules) {
+    rules.forEach(rule -> changesByRule.put(rule.id(), 0));
+  }
+
+  public void recordProcessedFile(RepairContext context) {
     filesProcessed++;
+
+    context.changesByRule().forEach(
+        (ruleId, changes) -> changesByRule.merge(ruleId, changes, Integer::sum));
   }
 
   public void recordFailedFile() {
@@ -20,6 +31,16 @@ public final class RepairReport {
 
   public int filesFailed() {
     return filesFailed;
+  }
+
+  public int changesMade() {
+    return changesByRule.values().stream()
+        .mapToInt(Integer::intValue)
+        .sum();
+  }
+
+  public Map<String, Integer> changesByRule() {
+    return Map.copyOf(changesByRule);
   }
 
   public boolean hasFailures() {
