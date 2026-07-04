@@ -20,3 +20,8 @@
 
 ### Added
 - Remove Empty Paragraphs rule
+
+## [0.4.0] - Milestone 1D - In Progress
+
+### Added
+- Remove faulty height declaration
