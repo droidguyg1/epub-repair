@@ -8,6 +8,7 @@ public final class RepairReport {
 
   private int filesProcessed;
   private int filesFailed;
+  private final Map<String, Integer> changesByNormalizer = new LinkedHashMap<>();
   private final Map<String, Integer> changesByRule = new LinkedHashMap<>();
 
   public RepairReport(Iterable<? extends RepairRule> rules) {
@@ -17,8 +18,13 @@ public final class RepairReport {
   public void recordProcessedFile(RepairContext context) {
     filesProcessed++;
 
+    context.changesByNormalizer().forEach(
+        (normalizerId, changes) ->
+            changesByNormalizer.merge(normalizerId, changes, Integer::sum));
+
     context.changesByRule().forEach(
-        (ruleId, changes) -> changesByRule.merge(ruleId, changes, Integer::sum));
+        (ruleId, changes) ->
+            changesByRule.merge(ruleId, changes, Integer::sum));
   }
 
   public void recordFailedFile() {
@@ -34,9 +40,16 @@ public final class RepairReport {
   }
 
   public int changesMade() {
-    return changesByRule.values().stream()
-        .mapToInt(Integer::intValue)
-        .sum();
+    return changesByNormalizer.values().stream()
+            .mapToInt(Integer::intValue)
+            .sum()
+        + changesByRule.values().stream()
+            .mapToInt(Integer::intValue)
+            .sum();
+  }
+
+  public Map<String, Integer> changesByNormalizer() {
+    return Map.copyOf(changesByNormalizer);
   }
 
   public Map<String, Integer> changesByRule() {

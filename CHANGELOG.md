@@ -21,7 +21,13 @@
 ### Added
 - Remove Empty Paragraphs rule
 
-## [0.4.0] - Milestone 1D - In Progress
+## [0.4.0] - Milestone 1D - Completed
 
 ### Added
 - Remove faulty height declaration
+
+## [0.5.0] - Milestone 2A - In Progress
+
+### Added
+- pre-parse XHTML normalization:
+  - Closing tags that don't have a content: area, base, br, col, hr, img, input, link, meta, and param.
