@@ -59,6 +59,14 @@ public final class Main {
     System.out.printf("Files failed:    %d%n", report.filesFailed());
     System.out.printf("Changes made:    %d%n", report.changesMade());
     System.out.println();
+    System.out.println("Changes by normalizer:");
+
+    for (Map.Entry<String, Integer> entry
+        : report.changesByNormalizer().entrySet()) {
+      System.out.printf("  %s: %d%n", entry.getKey(), entry.getValue());
+    }
+
+    System.out.println();
     System.out.println("Changes by rule:");
 
     for (Map.Entry<String, Integer> entry : report.changesByRule().entrySet()) {

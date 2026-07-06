@@ -1,7 +1,5 @@
 package org.stanb.epubrepair.xml;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -9,6 +7,7 @@ import java.nio.file.Path;
 
 import org.jdom2.Document;
 import org.jdom2.JDOMException;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -29,8 +28,8 @@ final class XmlRoundTripTest {
         """, StandardCharsets.UTF_8);
 
     XmlReader reader = new XmlReader();
-    new XmlWriter().write(reader.read(file), file);
-    Document document = reader.read(file);
+    new XmlWriter().write(reader.read(file).document(), file);
+    Document document = reader.read(file).document();
 
     assertEquals("http://www.w3.org/1999/xhtml",
         document.getRootElement().getNamespaceURI());
