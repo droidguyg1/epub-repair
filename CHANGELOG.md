@@ -26,7 +26,7 @@
 ### Added
 - Remove faulty height declaration
 
-## [0.5.0] - Milestone 2A - In Progress
+## [0.5.0] - Milestone 2A - Completed
 
 ### Added
 - pre-parse XHTML normalization:
