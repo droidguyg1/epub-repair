@@ -581,11 +581,11 @@ Also provide:
 
 * README.md
 * ARCHITECTURE.md
+* CHANGELOG.md
 * AI_CONTEXT.md
 
 Optionally include:
 
-* CHANGELOG.md
 * docs/CODING_STANDARDS.md
 
 These documents provide enough context to continue development without relying on previous conversation history.
