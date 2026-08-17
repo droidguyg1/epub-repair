@@ -10,11 +10,11 @@ The project follows milestone-based development. Each milestone is developed on 
 
 # Unreleased
 
-## Planned — Milestone 2B
+## Current — Milestone 2B
 
 ### Improve `WrapOrphanTextRule`
 
-**Status:** Planned
+**Status:** In-Progress
 
 #### Motivation
 
