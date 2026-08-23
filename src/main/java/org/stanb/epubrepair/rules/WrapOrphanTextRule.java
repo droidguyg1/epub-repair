@@ -12,8 +12,11 @@ import org.stanb.epubrepair.repair.RepairContext;
 import org.stanb.epubrepair.repair.RepairRule;
 
 /**
- * Wraps non-whitespace text nodes that are direct children of XHTML body
- * elements in paragraph elements.
+ * Wraps orphan body content in paragraph elements.
+ *
+ * <p>Direct children of {@code <body>} that are phrasing content are grouped
+ * into paragraph elements. Existing block-level elements are preserved
+ * unchanged.
  */
 public final class WrapOrphanTextRule implements RepairRule {
 
@@ -27,6 +30,7 @@ public final class WrapOrphanTextRule implements RepairRule {
   @Override
   public void apply(RepairContext context) {
     Namespace namespace = context.document().getRootElement().getNamespace();
+
     List<Element> bodies = new ArrayList<>();
 
     context.document()
@@ -40,17 +44,102 @@ public final class WrapOrphanTextRule implements RepairRule {
   private void wrapOrphanText(Element body, RepairContext context) {
     List<Content> children = new ArrayList<>(body.getContent());
 
+    List<Content> paragraphContent = new ArrayList<>();
+
     for (Content child : children) {
-      if (child instanceof Text text && !text.getText().isBlank()) {
-        int index = body.indexOf(text);
-        text.detach();
-
-        Element paragraph = new Element("p", body.getNamespace());
-        paragraph.addContent(text);
-        body.addContent(index, paragraph);
-
-        context.recordChange(ID);
+      if (isParagraphBoundary(child)) {
+        flushParagraph(body, paragraphContent, context);
+      } else {
+        paragraphContent.add(child);
       }
     }
+
+    flushParagraph(body, paragraphContent, context);
+  }
+
+  private void flushParagraph(
+      Element body,
+      List<Content> paragraphContent,
+      RepairContext context) {
+
+    if (!containsMeaningfulContent(paragraphContent)) {
+      paragraphContent.clear();
+      return;
+    }
+
+    int insertIndex = body.indexOf(paragraphContent.get(0));
+
+    Element paragraph = new Element("p", body.getNamespace());
+
+    for (Content content : List.copyOf(paragraphContent)) {
+      content.detach();
+      paragraph.addContent(content);
+    }
+
+    body.addContent(insertIndex, paragraph);
+
+    context.recordChange(ID);
+
+    paragraphContent.clear();
+  }
+
+  private boolean containsMeaningfulContent(List<Content> content) {
+    for (Content node : content) {
+      if (node instanceof Text text) {
+        if (!text.getText().isBlank()) {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private boolean isParagraphBoundary(Content content) {
+    return !isPhrasingContent(content);
+  }
+
+  private boolean isPhrasingContent(Content content) {
+    if (content instanceof Text) {
+      return true;
+    }
+
+    if (content instanceof Element element) {
+      return isPhrasingElement(element);
+    }
+
+    return false;
+  }
+
+  private boolean isPhrasingElement(Element element) {
+    return switch (element.getName()) {
+      case "a",
+          "abbr",
+          "acronym",
+          "b",
+          "big",
+          "br",
+          "cite",
+          "code",
+          "dfn",
+          "em",
+          "i",
+          "img",
+          "kbd",
+          "label",
+          "q",
+          "samp",
+          "small",
+          "span",
+          "strong",
+          "sub",
+          "sup",
+          "tt",
+          "var" -> true;
+
+      default -> false;
+    };
   }
 }

@@ -30,9 +30,9 @@ EPUB Repair follows a conservative editing philosophy.
 
 The XML document belongs to the user.
 
-The application modifies only those parts of the document that are explicitly targeted by repair rules.
+The application modifies only those parts of the document that are explicitly targeted by pre-parse normalizers or repair rules.
 
-If a document requires no repair, EPUB Repair does not rewrite it.
+If a document requires neither normalization nor repair, EPUB Repair does not rewrite it.
 
 Running the program twice on the same repaired document should produce no additional changes.
 
@@ -72,17 +72,21 @@ Future support for EPUB 3 may be added, but EPUB 2 compatibility is the primary 
 
 # Current Repair Rules
 
+Current pre-parse normalizers include:
+
+* `self-close-element` — self-closes XHTML empty elements that use HTML-style opening tags and would otherwise prevent XML parsing.
+
+The supported empty elements are `area`, `base`, `br`, `col`, `hr`, `img`, `input`, `link`, `meta`, and `param`.
+
 Current repair rules include:
 
 * `wrap-orphan-text` — wraps orphan text nodes inside paragraph elements.
 * `remove-empty-paragraph` — removes paragraphs containing no meaningful content.
+* `remove-paragraph-height` — removes inline CSS `height` declarations from paragraph elements while preserving other declarations.
 
-Planned rules include:
+Additional normalizers and rules will be added when concrete defects are discovered in real EPUB files.
 
-* Remove invalid paragraph height declarations.
-* Additional rules discovered through real EPUB repair work.
-
-Each repair is implemented as an independent rule and reports its own change count.
+Each normalizer and repair rule reports its own change count.
 
 ---
 
@@ -96,6 +100,12 @@ org.stanb.epubrepair
     io/
         XhtmlFileFinder
 
+    normalize/
+        NormalizationPipeline
+        NormalizationResult
+        PreParseNormalizer
+        SelfCloseElementNormalizer
+
     repair/
         RepairContext
         RepairEngine
@@ -106,23 +116,27 @@ org.stanb.epubrepair
     rules/
         WrapOrphanTextRule
         RemoveEmptyParagraphRule
+        RemoveParagraphHeightRule
 
     xml/
         XmlReader
+        XmlReadResult
         XmlWriter
 ```
 
-Every repair rule implements the common `RepairRule` interface.
+Pre-parse normalizers operate on source text before XML parsing. They repair narrowly defined syntax defects that would otherwise prevent JDOM from creating a document.
 
-The repair engine applies an ordered list of rules to each XHTML document.
+Every repair rule implements the common `RepairRule` interface. The repair engine applies an ordered list of rules to each parsed XHTML document.
 
-Each rule reports its changes through the document's `RepairContext`. The application aggregates those changes into a `RepairReport` for the complete run.
+Normalization and repair statistics are carried through the document's `RepairContext`. The application aggregates them into a `RepairReport` for the complete run.
 
-Rules are designed to remain independent and must not rely on execution order except where explicitly documented.
+Normalizers and rules are designed to remain independent and must not rely on execution order except where explicitly documented.
 
 ---
 
-# Repair Rules
+# Normalizers and Repair Rules
+
+Pre-parse normalizers exist only for defects that prevent XML parsing. They must be narrowly scoped, deterministic, idempotent, and conservative.
 
 Each repair rule must satisfy the following principles:
 
@@ -146,7 +160,15 @@ Find XHTML file
 
 ↓
 
-Read XML
+Read source text
+
+↓
+
+Apply pre-parse normalizers
+
+↓
+
+Parse XML
 
 ↓
 
@@ -158,11 +180,11 @@ Apply repair rules
 
 ↓
 
-Write XML only if changes were made
+Write XML if normalization or repair made changes
 
 ↓
 
-Aggregate per-rule statistics
+Aggregate normalizer and rule statistics
 ```
 
 The XML layer must preserve valid XHTML structure, including:
@@ -191,7 +213,7 @@ The Maven build produces a self-contained executable JAR containing EPUB Repair 
 Run EPUB Repair against a single XHTML file or a directory:
 
 ```bash
-java -jar target/epub-repair-0.3.0-SNAPSHOT.jar <file-or-directory>
+java -jar target/epub-repair-0.5.0-SNAPSHOT.jar <file-or-directory>
 ```
 
 Directories are searched recursively for `.html` and `.xhtml` files.
@@ -201,14 +223,18 @@ The application reports the number of changes made to each file and prints an ag
 ```text
 Files processed: 12
 Files failed:     0
-Changes made:     37
+Changes made:     39
+
+Changes by normalizer:
+  self-close-element: 2
 
 Changes by rule:
   wrap-orphan-text: 30
   remove-empty-paragraph: 7
+  remove-paragraph-height: 0
 ```
 
-Rules that execute but make no changes are still included with a count of zero.
+Normalizers and rules that execute but make no changes are still included with a count of zero.
 
 Future versions may support enabling individual repair rules from the command line.
 
@@ -281,7 +307,7 @@ Each milestone is developed on its own feature branch.
 Typical workflow:
 
 ```text
-feature/milestone-1c
+feature/milestone-2a
 
 ↓
 
@@ -340,15 +366,25 @@ GitHub Actions runs the Maven verification build for pushes and pull requests ac
 * Per-rule reporting
 * Wrap orphan text rule
 
-## Milestone 1C — In Progress
+## Milestone 1C — Complete
 
 * Remove empty paragraph rule
 
-## Milestone 1D
+## Milestone 1D — Complete
 
 * Remove paragraph height rule
 
-Future milestones will add additional repair rules as new EPUB issues are discovered.
+## Milestone 2A — Complete
+
+* Pre-parse normalization framework
+* Self-close XHTML empty elements before XML parsing
+* Lexical scanning that avoids comments, CDATA, processing instructions, and script/style content
+* Normalization persistence
+* Per-normalizer reporting
+* Normalization-only rewrite support
+* Regression coverage from real EPUB corpus defects
+
+Future milestones will be driven by concrete defects discovered in real EPUB files.
 
 ---
 
