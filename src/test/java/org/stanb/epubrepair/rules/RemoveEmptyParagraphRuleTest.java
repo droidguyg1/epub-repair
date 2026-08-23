@@ -1,13 +1,12 @@
 package org.stanb.epubrepair.rules;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.StringReader;
 import java.nio.file.Path;
 
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.stanb.epubrepair.repair.RepairContext;
 
@@ -71,6 +70,27 @@ final class RemoveEmptyParagraphRuleTest {
 
     assertEquals(1, firstRun.totalChanges());
     assertEquals(0, secondRun.totalChanges());
+  }
+
+  @Test
+  void removesNonBreakingSpaceParagraphs() throws Exception {
+    Document document = parse("""
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <body>
+            <p>\u00A0</p>
+            <p>\u00A0\u00A0</p>
+            <p>Keep me</p>
+          </body>
+        </html>
+        """);
+    RepairContext context = contextFor(document);
+
+    new RemoveEmptyParagraphRule().apply(context);
+
+    Element body = bodyOf(document);
+    assertEquals(1, body.getChildren("p", body.getNamespace()).size());
+    assertEquals("Keep me", body.getChild("p", body.getNamespace()).getText());
+    assertEquals(2, context.changesFor(RemoveEmptyParagraphRule.ID));
   }
 
   private Document parse(String xml) throws Exception {
