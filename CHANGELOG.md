@@ -10,30 +10,29 @@ The project follows milestone-based development. Each milestone is developed on 
 
 # Unreleased
 
-## Current — Milestone 2B
+## Completed — Milestone 2B
 
 ### Improve `WrapOrphanTextRule`
 
-**Status:** In-Progress
+**Status:** Completed
 
 #### Motivation
 
-Real EPUB content revealed that the current implementation incorrectly treats inline XHTML elements as paragraph boundaries.
+Real EPUB content revealed that the current implementation incorrectly treated inline XHTML elements as paragraph boundaries.
 
 Example input:
 
 ```html
-Did the castle <i>help</i> Filipe to find their castle?<br/><br/>
+Did the castle <i>help</i> Filipe to find their castle?
+
 'Is everything alright, Ken?'
-```
+````
 
 Current output:
 
 ```xml
 <p>Did the castle</p>
-
 <i>help</i>
-
 <p>Filipe to find their castle?</p>
 ```
 
@@ -51,12 +50,14 @@ Desired output:
 </p>
 ```
 
-#### Planned work
+#### Completed work
 
-* Treat inline XHTML elements as part of the current paragraph.
-* Distinguish phrasing content from paragraph boundaries.
-* Preserve inline formatting while wrapping orphan content.
-* Add regression tests covering inline elements within orphan paragraphs.
+* Refactored `WrapOrphanTextRule` to group direct-body phrasing content into paragraphs.
+* Distinguished phrasing content from paragraph boundaries.
+* Preserved inline XHTML elements and their formatting while wrapping orphan content.
+* Added regression tests covering inline elements within orphan paragraphs, including leading, trailing, and multiple inline elements.
+* Added a real-world regression test based on EPUB content containing inline formatting and NBSP-only paragraphs.
+* Verified that the repair remains idempotent.
 
 ---
 
