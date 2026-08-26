@@ -3,8 +3,10 @@ package org.stanb.epubrepair.repair;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+
 import org.jdom2.JDOMException;
 import org.stanb.epubrepair.rules.RemoveEmptyParagraphRule;
+import org.stanb.epubrepair.rules.RemoveOrphanBodyLinkRule;
 import org.stanb.epubrepair.rules.RemoveParagraphHeightRule;
 import org.stanb.epubrepair.rules.WrapOrphanTextRule;
 import org.stanb.epubrepair.xml.XmlReadResult;
@@ -17,6 +19,7 @@ public final class XhtmlRepair {
   private final XmlWriter xmlWriter = new XmlWriter();
   private final List<RepairRule> rules = List.of(
       new WrapOrphanTextRule(),
+      new RemoveOrphanBodyLinkRule(),
       new RemoveEmptyParagraphRule(),
       new RemoveParagraphHeightRule());
   private final RepairEngine repairEngine = new RepairEngine(rules);
