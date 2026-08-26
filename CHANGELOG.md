@@ -144,6 +144,10 @@ Regression tests will accompany every newly supported attribute.
 ## Milestone 1C
 
 * Added `RemoveEmptyParagraphRule`.
+* Removed paragraphs containing only whitespace or non-breaking spaces (`U+00A0`).
+* Preserved paragraphs containing child elements.
+* Added regression tests for ordinary whitespace, non-breaking spaces, mixed whitespace, 
+  child elements,   and idempotence.
 
 ---
 

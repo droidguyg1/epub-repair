@@ -45,8 +45,10 @@ public final class RemoveEmptyParagraphRule implements RepairRule {
   }
 
   private boolean isBlank(String text) {
-    return text.isBlank()
-        || text.codePoints().allMatch(codePoint -> codePoint == '\u00A0');
+    return text.codePoints()
+        .allMatch(codePoint ->
+            Character.isWhitespace(codePoint)
+                || codePoint == '\u00A0');
   }
 
   private void remove(Element paragraph, RepairContext context) {
