@@ -8,7 +8,99 @@ The project follows milestone-based development. Each milestone is developed on 
 
 ---
 
-# Unreleased
+# Planned / Unreleased
+
+## Planned — Milestone 2D
+
+### Remove unsupported XHTML attributes
+
+**Status:** Planned
+
+#### Motivation
+
+Modern HTML editors occasionally introduce HTML5 attributes that are invalid in EPUB 2 XHTML.
+
+Example:
+
+```xml
+<div aria-hidden="true">
+```
+
+EPUBCheck rejects these attributes.
+
+#### Planned work
+
+Create a repair rule that removes attributes unsupported by XHTML 1.1.
+
+The initial implementation will likely begin with attributes encountered in the real EPUB corpus (for example, `aria-hidden`) and expand only as additional real-world cases are discovered.
+
+Regression tests will accompany every newly supported attribute.
+
+---
+
+# Completed
+
+## Planned — Milestone 2D
+
+### Remove unsupported XHTML attributes
+
+**Status:** Planned
+
+#### Motivation
+
+Modern HTML editors occasionally introduce HTML5 attributes that are invalid in EPUB 2 XHTML.
+
+Example:
+
+```xml
+<div aria-hidden="true">
+````
+
+EPUBCheck rejects these attributes.
+
+#### Planned work
+
+Create a repair rule that removes attributes unsupported by XHTML 1.1.
+
+The initial implementation will likely begin with attributes encountered in the real EPUB corpus (for example, `aria-hidden`) and expand only as additional real-world cases are discovered.
+
+Regression tests will accompany every newly supported attribute.
+
+---
+
+# Completed
+
+## Completed — Milestone 2C
+
+### Remove orphan body-level links
+
+**Status:** Completed
+
+#### Motivation
+
+Some EPUBs contain standalone `<a>` elements directly under `<body>`.
+
+Example:
+
+```xml
+<body>
+  ...
+  <a href="chapter2.xhtml">Next chapter</a>
+  ...
+</body>
+```
+
+This is invalid XHTML 1.1. Report each removed link on stdout, including its source file, link text, and target.
+
+#### Completed work
+
+* Added `RemoveOrphanBodyLinkRule`.
+* Removed `<a>` elements that are direct children of `<body>`.
+* Preserved links nested inside other elements.
+* Reported each removed link to stdout with its source file, link text, and `href` target.
+* Added unit tests covering removal, multiple links, nested links, no-op behavior, and idempotence.
+
+---
 
 ## Completed — Milestone 2B
 
@@ -61,65 +153,6 @@ Desired output:
 
 ---
 
-## Planned — Milestone 2C
-
-### Remove orphan body-level links
-
-**Status:** Planned
-
-#### Motivation
-
-Some EPUBs contain standalone `<a>` elements directly under `<body>`.
-
-Example:
-
-```xml
-<body>
-  ...
-  <a href="chapter2.xhtml">Next chapter</a>
-</body>
-```
-
-This is invalid XHTML 1.1.
-
-#### Planned work
-
-Introduce an optional repair rule that removes or otherwise handles standalone body-level anchor elements.
-
-Because these links may represent intentional navigation or editorial content, this rule should be implemented conservatively and may ultimately become configurable rather than enabled unconditionally.
-
----
-
-## Planned — Milestone 2D
-
-### Remove unsupported XHTML attributes
-
-**Status:** Planned
-
-#### Motivation
-
-Modern HTML editors occasionally introduce HTML5 attributes that are invalid in EPUB 2 XHTML.
-
-Example:
-
-```xml
-<div aria-hidden="true">
-```
-
-EPUBCheck rejects these attributes.
-
-#### Planned work
-
-Create a repair rule that removes attributes unsupported by XHTML 1.1.
-
-The initial implementation will likely begin with attributes encountered in the real EPUB corpus (for example, `aria-hidden`) and expand only as additional real-world cases are discovered.
-
-Regression tests will accompany every newly supported attribute.
-
----
-
-# Completed
-
 ## Milestone 2A
 
 * Added pre-parse normalization framework.
@@ -146,8 +179,7 @@ Regression tests will accompany every newly supported attribute.
 * Added `RemoveEmptyParagraphRule`.
 * Removed paragraphs containing only whitespace or non-breaking spaces (`U+00A0`).
 * Preserved paragraphs containing child elements.
-* Added regression tests for ordinary whitespace, non-breaking spaces, mixed whitespace, 
-  child elements,   and idempotence.
+* Added regression tests for ordinary whitespace, non-breaking spaces, mixed whitespace, child elements, and idempotence.
 
 ---
 
