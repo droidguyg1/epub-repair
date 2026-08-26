@@ -93,6 +93,31 @@ final class RemoveEmptyParagraphRuleTest {
     assertEquals(2, context.changesFor(RemoveEmptyParagraphRule.ID));
   }
 
+  @Test
+  void removesParagraphsContainingMixedWhitespaceAndNonBreakingSpaces()
+      throws Exception {
+    Document document = parse("""
+        <html xmlns="http://www.w3.org/1999/xhtml">
+          <body>
+            <p> \u00A0 </p>
+            <p>\u00A0 \u00A0</p>
+            <p>Keep me</p>
+          </body>
+        </html>
+        """);
+    RepairContext context = contextFor(document);
+
+    new RemoveEmptyParagraphRule().apply(context);
+
+    Element body = bodyOf(document);
+    assertEquals(1, body.getChildren("p", body.getNamespace()).size());
+    assertEquals("Keep me", body.getChild("p", body.getNamespace()).getText());
+    assertEquals(2, context.changesFor(RemoveEmptyParagraphRule.ID));
+  }
+
+
+  // private
+
   private Document parse(String xml) throws Exception {
     return new SAXBuilder().build(new StringReader(xml));
   }
