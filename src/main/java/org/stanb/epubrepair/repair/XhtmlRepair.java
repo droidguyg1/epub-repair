@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.jdom2.JDOMException;
+import org.stanb.epubrepair.rules.RemoveAriaHiddenAttributeRule;
 import org.stanb.epubrepair.rules.RemoveEmptyParagraphRule;
 import org.stanb.epubrepair.rules.RemoveOrphanBodyLinkRule;
 import org.stanb.epubrepair.rules.RemoveParagraphHeightRule;
@@ -21,7 +22,8 @@ public final class XhtmlRepair {
       new RemoveOrphanBodyLinkRule(),
       new WrapOrphanTextRule(),
       new RemoveEmptyParagraphRule(),
-      new RemoveParagraphHeightRule());
+      new RemoveParagraphHeightRule(),
+      new RemoveAriaHiddenAttributeRule());
   private final RepairEngine repairEngine = new RepairEngine(rules);
 
   public List<RepairRule> rules() {
