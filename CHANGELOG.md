@@ -10,41 +10,17 @@ The project follows milestone-based development. Each milestone is developed on 
 
 # Planned / Unreleased
 
-## Planned — Milestone 2D
-
-### Remove unsupported XHTML attributes
-
-**Status:** Planned
-
-#### Motivation
-
-Modern HTML editors occasionally introduce HTML5 attributes that are invalid in EPUB 2 XHTML.
-
-Example:
-
-```xml
-<div aria-hidden="true">
-```
-
-EPUBCheck rejects these attributes.
-
-#### Planned work
-
-Create a repair rule that removes attributes unsupported by XHTML 1.1.
-
-The initial implementation will likely begin with attributes encountered in the real EPUB corpus (for example, `aria-hidden`) and expand only as additional real-world cases are discovered.
-
-Regression tests will accompany every newly supported attribute.
+TBD
 
 ---
 
 # Completed
 
-## Planned — Milestone 2D
+## Completed — Milestone 2D
 
 ### Remove unsupported XHTML attributes
 
-**Status:** Planned
+**Status:** Completed
 
 #### Motivation
 
@@ -53,18 +29,22 @@ Modern HTML editors occasionally introduce HTML5 attributes that are invalid in 
 Example:
 
 ```xml
-<div aria-hidden="true">
-````
+<div class="calibre1" aria-hidden="true">
+  <img src="separator.png" alt="" class="calibre6" />
+</div>
+```
 
 EPUBCheck rejects these attributes.
 
-#### Planned work
+#### Completed work
 
-Create a repair rule that removes attributes unsupported by XHTML 1.1.
-
-The initial implementation will likely begin with attributes encountered in the real EPUB corpus (for example, `aria-hidden`) and expand only as additional real-world cases are discovered.
-
-Regression tests will accompany every newly supported attribute.
+* Added `RemoveAriaHiddenAttributeRule`.
+* Removed unsupported `aria-hidden` attributes from XHTML elements.
+* Preserved the affected elements, their other attributes, and their content.
+* Recorded each removed attribute in the per-rule change count.
+* Added regression tests covering attribute removal, preservation of other attributes and content, multiple occurrences, and idempotence.
+* Added the rule to the repair pipeline.
+* Verified the repair against the real EPUB source.
 
 ---
 
@@ -99,6 +79,8 @@ This is invalid XHTML 1.1. Report each removed link on stdout, including its sou
 * Preserved links nested inside other elements.
 * Reported each removed link to stdout with its source file, link text, and `href` target.
 * Added unit tests covering removal, multiple links, nested links, no-op behavior, and idempotence.
+
+Version: 0.6.0-SNAPSHOT
 
 ---
 

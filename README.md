@@ -80,9 +80,10 @@ The supported empty elements are `area`, `base`, `br`, `col`, `hr`, `img`, `inpu
 
 Current repair rules include:
 
-* `wrap-orphan-text` — wraps orphan text nodes inside paragraph elements.
-* `remove-empty-paragraph` — removes paragraphs containing no meaningful content.
+* `wrap-orphan-text` — groups direct-body phrasing content into paragraph elements while preserving inline XHTML elements and formatting.
+* `remove-empty-paragraph` — removes paragraphs containing no meaningful content, including paragraphs containing only whitespace or non-breaking spaces (`U+00A0`).
 * `remove-paragraph-height` — removes inline CSS `height` declarations from paragraph elements while preserving other declarations.
+* `remove-orphan-body-link` — removes `<a>` elements that occur directly under `<body>` and reports each removed link, including its source file, text, and target.
 
 Additional normalizers and rules will be added when concrete defects are discovered in real EPUB files.
 
@@ -98,15 +99,18 @@ org.stanb.epubrepair
     Main
 
     io/
+
         XhtmlFileFinder
 
     normalize/
+
         NormalizationPipeline
         NormalizationResult
         PreParseNormalizer
         SelfCloseElementNormalizer
 
     repair/
+
         RepairContext
         RepairEngine
         RepairReport
@@ -114,11 +118,14 @@ org.stanb.epubrepair
         XhtmlRepair
 
     rules/
+
         WrapOrphanTextRule
         RemoveEmptyParagraphRule
         RemoveParagraphHeightRule
+        RemoveOrphanBodyLinkRule
 
     xml/
+
         XmlReader
         XmlReadResult
         XmlWriter
@@ -216,6 +223,8 @@ Run EPUB Repair against a single XHTML file or a directory:
 java -jar target/epub-repair-0.5.0-SNAPSHOT.jar <file-or-directory>
 ```
 
+Here, specify the `three-friends-git/src` folder.
+
 Directories are searched recursively for `.html` and `.xhtml` files.
 
 The application reports the number of changes made to each file and prints an aggregate summary:
@@ -226,15 +235,20 @@ Files failed:     0
 Changes made:     39
 
 Changes by normalizer:
+
   self-close-element: 2
 
 Changes by rule:
+
   wrap-orphan-text: 30
-  remove-empty-paragraph: 7
+  remove-empty-paragraph: 4
   remove-paragraph-height: 0
+  remove-orphan-body-link: 3
 ```
 
 Normalizers and rules that execute but make no changes are still included with a count of zero.
+
+Removed body-level links are reported individually with their source file, link text, and target.
 
 Future versions may support enabling individual repair rules from the command line.
 
@@ -307,7 +321,7 @@ Each milestone is developed on its own feature branch.
 Typical workflow:
 
 ```text
-feature/milestone-2a
+feature/milestone-2c
 
 ↓
 
@@ -369,10 +383,16 @@ GitHub Actions runs the Maven verification build for pushes and pull requests ac
 ## Milestone 1C — Complete
 
 * Remove empty paragraph rule
+* Remove paragraphs containing only whitespace or non-breaking spaces (`U+00A0`)
+* Preserve paragraphs containing child elements
+* Regression coverage for whitespace, non-breaking spaces, mixed whitespace, child elements, and idempotence
 
 ## Milestone 1D — Complete
 
-* Remove paragraph height rule
+* Remove inline CSS `height` declarations from paragraph elements
+* Preserve unrelated CSS declarations
+* Remove the `style` attribute when no declarations remain
+* Regression coverage and idempotence testing
 
 ## Milestone 2A — Complete
 
@@ -383,6 +403,27 @@ GitHub Actions runs the Maven verification build for pushes and pull requests ac
 * Per-normalizer reporting
 * Normalization-only rewrite support
 * Regression coverage from real EPUB corpus defects
+
+## Milestone 2B — Complete
+
+* Group direct-body phrasing content into paragraphs
+* Preserve inline XHTML elements and formatting
+* Distinguish phrasing content from paragraph boundaries
+* Regression coverage for leading, trailing, and multiple inline elements
+* Real-world regression coverage for inline formatting and NBSP-only paragraphs
+* Idempotence verification
+
+## Milestone 2C — Complete
+
+* Remove orphan `<a>` elements directly under `<body>`
+* Report each removed link with its source file, text, and target
+* Regression coverage and idempotence testing
+
+## Milestone 2D — Planned
+
+* Remove unsupported XHTML attributes
+* Begin with concrete attributes encountered in real EPUB files, such as `aria-hidden`
+* Add regression coverage for each supported attribute
 
 Future milestones will be driven by concrete defects discovered in real EPUB files.
 
