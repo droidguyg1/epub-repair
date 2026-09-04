@@ -100,6 +100,8 @@ This is invalid XHTML 1.1. Report each removed link on stdout, including its sou
 * Reported each removed link to stdout with its source file, link text, and `href` target.
 * Added unit tests covering removal, multiple links, nested links, no-op behavior, and idempotence.
 
+Version: 0.6.0-SNAPSHOT
+
 ---
 
 ## Completed — Milestone 2B

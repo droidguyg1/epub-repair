@@ -18,8 +18,8 @@ public final class XhtmlRepair {
   private final XmlReader xmlReader = new XmlReader();
   private final XmlWriter xmlWriter = new XmlWriter();
   private final List<RepairRule> rules = List.of(
-      new WrapOrphanTextRule(),
       new RemoveOrphanBodyLinkRule(),
+      new WrapOrphanTextRule(),
       new RemoveEmptyParagraphRule(),
       new RemoveParagraphHeightRule());
   private final RepairEngine repairEngine = new RepairEngine(rules);

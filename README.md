@@ -223,6 +223,8 @@ Run EPUB Repair against a single XHTML file or a directory:
 java -jar target/epub-repair-0.5.0-SNAPSHOT.jar <file-or-directory>
 ```
 
+Here, specify the `three-friends-git/src` folder.
+
 Directories are searched recursively for `.html` and `.xhtml` files.
 
 The application reports the number of changes made to each file and prints an aggregate summary:
